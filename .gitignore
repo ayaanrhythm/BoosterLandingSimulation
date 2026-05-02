@@ -5,3 +5,5 @@
 *.olean
 *.ilean
 *.trace
+.DS_Store
+Thumbs.db
