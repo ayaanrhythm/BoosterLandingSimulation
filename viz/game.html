@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Booster Landing Demo</title>
+  <style>
+    :root {
+      --bg: #04112a;
+      --panel: #0c1d44;
+      --panel2: #132754;
+      --text: #e8eefc;
+      --muted: #a8b7df;
+      --accent: #67c7ff;
+      --green: #84f2b1;
+      --red: #ff7c8d;
+      --yellow: #ffd36b;
+      --purple: #b788ff;
+      --cyan: #78f0e7;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, Segoe UI, system-ui, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top, #0b1f4d 0%, #04112a 35%, #020918 100%);
+      color: var(--text);
+    }
+
+    .app {
+      width: min(1180px, 95vw);
+      margin: 18px auto;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(3, 12, 35, 0.9);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 18px 18px 14px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(180deg, rgba(5,18,52,0.95), rgba(5,18,52,0.7));
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
+    .title .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .mode-pill {
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(103,199,255,0.45);
+      color: var(--accent);
+      background: rgba(103,199,255,0.08);
+      font-weight: 700;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(7, 19, 51, 0.85);
+      align-items: center;
+    }
+
+    button, select {
+      background: #15264d;
+      color: var(--text);
+      border: 1px solid #2a3f74;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover, select:hover {
+      background: #1a2e5c;
+    }
+
+    .controls .spacer {
+      flex: 1;
+    }
+
+    .controls label {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 290px;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .canvas-wrap, .sidebar {
+      background: rgba(14, 29, 68, 0.75);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .canvas-wrap {
+      min-height: 640px;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 12px;
+      background:
+        linear-gradient(180deg, rgba(10,23,67,0.95), rgba(7,18,50,0.98));
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .sidebar h2 {
+      margin: 4px 0 12px 0;
+      font-size: 16px;
+    }
+
+    .panel {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 5px 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.08);
+      font-size: 14px;
+    }
+
+    .row:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      color: #bfd0fb;
+    }
+
+    .value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .value.green {
+      color: var(--green);
+    }
+
+    .value.red {
+      color: var(--red);
+    }
+
+    .value.cyan {
+      color: var(--cyan);
+    }
+
+    .help {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .small-note {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    .kbd {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 12px;
+      color: #dfe8ff;
+    }
+
+    @media (max-width: 980px) {
+      .main {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="title">
+        <h1>Booster Landing Demo</h1>
+        <div class="subtitle">Standalone Lean 4 frame generator + browser animation</div>
+      </div>
+      <div class="mode-pill" id="modePill">Mode: interactive</div>
+    </div>
+
+    <div class="controls">
+      <button id="watchDemoBtn">Watch Demo</button>
+      <button id="playInteractiveBtn">Play Interactive</button>
+      <button id="pauseBtn">Pause</button>
+      <button id="restartBtn">Restart</button>
+
+      <div class="spacer"></div>
+
+      <label for="shipModeSelect">Ship mode:</label>
+      <select id="shipModeSelect">
+        <option value="moving">Moving</option>
+        <option value="static">Static</option>
+      </select>
+    </div>
+
+    <div class="main">
+      <div class="canvas-wrap">
+        <canvas id="gameCanvas" width="860" height="610"></canvas>
+        <div class="small-note">
+          Demo mode replays <code>frames.json</code> generated by Lean.
+          Interactive mode is now manual: no autopilot target pulls the booster.
+          Use thrust to land safely on the deck.
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <h2>HUD / World State</h2>
+
+        <div class="panel">
+          <div class="row"><div class="label">mode</div><div class="value cyan" id="hudMode">interactive</div></div>
+          <div class="row"><div class="label">ship mode</div><div class="value" id="hudShipMode">moving</div></div>
+          <div class="row"><div class="label">tick</div><div class="value" id="hudTick">0</div></div>
+          <div class="row"><div class="label">status</div><div class="value" id="hudStatus">flying</div></div>
+          <div class="row"><div class="label">distance to deck</div><div class="value" id="hudDistance">0</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="row"><div class="label">position</div><div class="value" id="hudPosition">(0, 0)</div></div>
+          <div class="row"><div class="label">velocity</div><div class="value" id="hudVelocity">(0, 0)</div></div>
+          <div class="row"><div class="label">acceleration</div><div class="value" id="hudAcceleration">(0, 0)</div></div>
+          <div class="row"><div class="label">fuel</div><div class="value" id="hudFuel">0</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="row"><div class="label">measured velocity</div><div class="value" id="hudMeasuredVelocity">(0, 0)</div></div>
+          <div class="row"><div class="label">measured acceleration</div><div class="value" id="hudMeasuredAcceleration">(0, 0)</div></div>
+          <div class="row"><div class="label">wind</div><div class="value" id="hudWind">(0, 0)</div></div>
+          <div class="row"><div class="label">thrust</div><div class="value" id="hudThrust">(0, 0)</div></div>
+          <div class="row"><div class="label">drag</div><div class="value" id="hudDrag">(0, 0)</div></div>
+        </div>
+
+        <div class="panel help">
+          <div><strong>Interactive controls</strong></div>
+          <div><span class="kbd">W</span> / <span class="kbd">↑</span>: main upward thrust</div>
+          <div><span class="kbd">A</span> / <span class="kbd">←</span>: thrust left</div>
+          <div><span class="kbd">D</span> / <span class="kbd">→</span>: thrust right</div>
+          <div style="margin-top: 8px;">
+            <strong>Landing logic:</strong><br>
+            The booster lands only when its landing legs touch the deck,
+            both feet are over the ship, and the velocity is safe.
+            Otherwise it crashes.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const modePill = document.getElementById("modePill");
+    const shipModeSelect = document.getElementById("shipModeSelect");
+
+    const hudMode = document.getElementById("hudMode");
+    const hudShipMode = document.getElementById("hudShipMode");
+    const hudTick = document.getElementById("hudTick");
+    const hudStatus = document.getElementById("hudStatus");
+    const hudDistance = document.getElementById("hudDistance");
+    const hudPosition = document.getElementById("hudPosition");
+    const hudVelocity = document.getElementById("hudVelocity");
+    const hudAcceleration = document.getElementById("hudAcceleration");
+    const hudFuel = document.getElementById("hudFuel");
+    const hudMeasuredVelocity = document.getElementById("hudMeasuredVelocity");
+    const hudMeasuredAcceleration = document.getElementById("hudMeasuredAcceleration");
+    const hudWind = document.getElementById("hudWind");
+    const hudThrust = document.getElementById("hudThrust");
+    const hudDrag = document.getElementById("hudDrag");
+
+    const CONFIG = {
+      dt: 0.18,
+      maxTicks: 420,
+
+      deckHalfWidth: 2.2,
+      deckHeight: 0.5,
+      waterY: -0.4,
+
+      worldLeft: -15,
+      worldRight: 15,
+      worldBottom: -2,
+      worldTop: 18,
+
+      frameDelayMs: 70,
+
+      gravity: -0.105,
+      dragK: -0.045,
+      windStrength: 0.012,
+
+      mainThrust: 0.235,
+      sideThrust: 0.105,
+      burnMain: 0.055,
+      burnSide: 0.025,
+
+      touchdownTol: 0.08,
+      safeRelVx: 0.42,
+      safeVy: 0.58
+    };
+
+    const ROCKET = {
+      footOffset: 0.72,
+      legSpread: 0.34
+    };
+
+    const app = {
+      mode: "interactive",
+      shipMode: "moving",
+      playing: true,
+      demoFrames: [],
+      demoIndex: 0,
+      world: null,
+      keys: new Set()
+    };
+
+    function fmt(n) {
+      return Number(n).toFixed(2);
+    }
+
+    function vec(x, y) {
+      return { x, y };
+    }
+
+    function pt(x, y) {
+      return { x, y };
+    }
+
+    function add(u, v) {
+      return { x: u.x + v.x, y: u.y + v.y };
+    }
+
+    function scale(k, v) {
+      return { x: k * v.x, y: k * v.y };
+    }
+
+    function abs(x) {
+      return Math.abs(x);
+    }
+
+    function landingCenterY() {
+      return CONFIG.deckHeight + ROCKET.footOffset;
+    }
+
+    function footPoints(booster) {
+      return {
+        left: {
+          x: booster.x - ROCKET.legSpread,
+          y: booster.y - ROCKET.footOffset
+        },
+        right: {
+          x: booster.x + ROCKET.legSpread,
+          y: booster.y - ROCKET.footOffset
+        }
+      };
+    }
+
+    function worldToScreen(p) {
+      const x = (p.x - CONFIG.worldLeft) / (CONFIG.worldRight - CONFIG.worldLeft) * canvas.width;
+      const y = canvas.height - (p.y - CONFIG.worldBottom) / (CONFIG.worldTop - CONFIG.worldBottom) * canvas.height;
+      return { x, y };
+    }
+
+    function windAt(tick) {
+      const phase = tick % 160;
+
+      if (phase < 40) return vec(CONFIG.windStrength, 0);
+      if (phase < 80) return vec(-CONFIG.windStrength * 0.8, 0);
+      if (phase < 120) return vec(CONFIG.windStrength * 0.45, 0);
+      return vec(0, 0);
+    }
+
+    function dragAccel(v) {
+      return scale(CONFIG.dragK, v);
+    }
+
+    function userThrust(keys, fuel) {
+      if (fuel <= 0) return vec(0, 0);
+
+      let ax = 0;
+      let ay = 0;
+
+      if (keys.has("ArrowLeft") || keys.has("a") || keys.has("A")) {
+        ax -= CONFIG.sideThrust;
+      }
+
+      if (keys.has("ArrowRight") || keys.has("d") || keys.has("D")) {
+        ax += CONFIG.sideThrust;
+      }
+
+      if (keys.has("ArrowUp") || keys.has("w") || keys.has("W")) {
+        ay += CONFIG.mainThrust;
+      }
+
+      return vec(ax, ay);
+    }
+
+    function fuelBurn(keys) {
+      let burn = 0;
+
+      if (keys.has("ArrowUp") || keys.has("w") || keys.has("W")) {
+        burn += CONFIG.burnMain;
+      }
+
+      if (
+        keys.has("ArrowLeft") || keys.has("a") || keys.has("A") ||
+        keys.has("ArrowRight") || keys.has("d") || keys.has("D")
+      ) {
+        burn += CONFIG.burnSide;
+      }
+
+      return burn;
+    }
+
+    function updateShip(state) {
+      if (state.shipMode === "static") {
+        return { x: state.ship.x, y: 0, vx: 0, vy: 0 };
+      }
+
+      let x = state.ship.x + CONFIG.dt * state.shipVel.x;
+      let vx = state.shipVel.x;
+
+      if (x > 8) {
+        x = 8;
+        vx = -0.32;
+      } else if (x < -8) {
+        x = -8;
+        vx = 0.32;
+      }
+
+      return { x, y: 0, vx, vy: 0 };
+    }
+
+    function measuredVelocity(nextBooster, prevBooster) {
+      return vec(
+        (nextBooster.x - prevBooster.x) / CONFIG.dt,
+        (nextBooster.y - prevBooster.y) / CONFIG.dt
+      );
+    }
+
+    function measuredAcceleration(nextVel, prevVel) {
+      return vec(
+        (nextVel.x - prevVel.x) / CONFIG.dt,
+        (nextVel.y - prevVel.y) / CONFIG.dt
+      );
+    }
+
+    function distanceToDeck(state) {
+      const feet = footPoints(state.booster);
+      const footY = Math.min(feet.left.y, feet.right.y);
+      return abs(state.ship.x - state.booster.x) + abs(footY - CONFIG.deckHeight);
+    }
+
+    function checkLandingOrCrash(prevBooster, nextShip, nextBooster, nextVel) {
+      const prevFeet = footPoints(prevBooster);
+      const nextFeet = footPoints(nextBooster);
+
+      const prevFootY = Math.min(prevFeet.left.y, prevFeet.right.y);
+      const nextFootY = Math.min(nextFeet.left.y, nextFeet.right.y);
+
+      const crossedDeck =
+        prevFootY > CONFIG.deckHeight &&
+        nextFootY <= CONFIG.deckHeight + CONFIG.touchdownTol;
+
+      const touchedDeck =
+        nextFootY <= CONFIG.deckHeight + CONFIG.touchdownTol;
+
+      const leftFootOnDeck =
+        abs(nextFeet.left.x - nextShip.x) <= CONFIG.deckHalfWidth;
+
+      const rightFootOnDeck =
+        abs(nextFeet.right.x - nextShip.x) <= CONFIG.deckHalfWidth;
+
+      const bothFeetOnDeck =
+        leftFootOnDeck && rightFootOnDeck;
+
+      const safeHorizontal =
+        abs(nextVel.x - nextShip.vx) <= CONFIG.safeRelVx;
+
+      const safeVertical =
+        abs(nextVel.y) <= CONFIG.safeVy;
+
+      if (crossedDeck || touchedDeck) {
+        if (bothFeetOnDeck && safeHorizontal && safeVertical) {
+          return {
+            status: "landed",
+            booster: {
+              x: nextBooster.x,
+              y: landingCenterY()
+            },
+            velocity: {
+              x: nextShip.vx,
+              y: 0
+            }
+          };
+        }
+
+        return {
+          status: "crashed",
+          booster: nextBooster,
+          velocity: nextVel
+        };
+      }
+
+      if (nextFootY <= CONFIG.waterY) {
+        return {
+          status: "crashed",
+          booster: nextBooster,
+          velocity: nextVel
+        };
+      }
+
+      return {
+        status: "flying",
+        booster: nextBooster,
+        velocity: nextVel
+      };
+    }
+
+    function stopWhen(state) {
+      return state.done || state.tick >= CONFIG.maxTicks;
+    }
+
+    function makeInitialInteractiveWorld(shipMode) {
+      const shipX = shipMode === "static" ? 0 : -3.5;
+      const shipVx = shipMode === "static" ? 0 : 0.32;
+
+      const booster = {
+        x: -8.5,
+        y: 16
+      };
+
+      const velocity = {
+        x: 0.42,
+        y: -0.18
+      };
+
+      return {
+        tick: 0,
+        done: false,
+        status: "flying",
+
+        shipMode,
+        ship: { x: shipX, y: 0 },
+        shipVel: { x: shipVx, y: 0 },
+
+        booster,
+        prevBooster: { ...booster },
+
+        velocity,
+        prevVelocity: { ...velocity },
+
+        acceleration: { x: 0, y: 0 },
+        measuredVelocity: { ...velocity },
+        measuredAcceleration: { x: 0, y: 0 },
+
+        wind: { x: 0, y: 0 },
+        drag: { x: 0, y: 0 },
+        thrust: { x: 0, y: 0 },
+
+        fuel: 10,
+        distance: 0,
+
+        path: [{ ...booster }]
+      };
+    }
+
+    function onTickInteractive(state) {
+      if (stopWhen(state)) {
+        return { ...state, done: true };
+      }
+
+      if (state.status === "landed") {
+        return { ...state, done: true };
+      }
+
+      if (state.status === "crashed") {
+        return { ...state, done: true };
+      }
+
+      const nextShip = updateShip(state);
+
+      const gravity = vec(0, CONFIG.gravity);
+      const wind = windAt(state.tick);
+      const drag = dragAccel(state.velocity);
+      const thrust = userThrust(app.keys, state.fuel);
+
+      const netAcc = add(gravity, add(wind, add(drag, thrust)));
+
+      const nextVel = add(state.velocity, scale(CONFIG.dt, netAcc));
+
+      const nextBooster = {
+        x: state.booster.x + CONFIG.dt * nextVel.x,
+        y: state.booster.y + CONFIG.dt * nextVel.y
+      };
+
+      const landingResult = checkLandingOrCrash(
+        state.booster,
+        nextShip,
+        nextBooster,
+        nextVel
+      );
+
+      const finalBooster = landingResult.booster;
+      const finalVel = landingResult.velocity;
+      const finalStatus = landingResult.status;
+
+      const nextState = {
+        tick: state.tick + 1,
+        done: finalStatus !== "flying",
+        status: finalStatus,
+
+        shipMode: state.shipMode,
+        ship: { x: nextShip.x, y: nextShip.y },
+        shipVel: { x: nextShip.vx, y: nextShip.vy },
+
+        booster: finalBooster,
+        prevBooster: { ...state.booster },
+
+        velocity: finalVel,
+        prevVelocity: { ...state.velocity },
+
+        acceleration: netAcc,
+        measuredVelocity: measuredVelocity(finalBooster, state.booster),
+        measuredAcceleration: measuredAcceleration(finalVel, state.velocity),
+
+        wind,
+        drag,
+        thrust,
+
+        fuel: Math.max(0, state.fuel - fuelBurn(app.keys)),
+        distance: 0,
+
+        path: [...state.path, { ...finalBooster }]
+      };
+
+      nextState.distance = distanceToDeck(nextState);
+
+      return nextState;
+    }
+
+    function normalizeDemoFrame(raw) {
+      return {
+        tick: raw.tick ?? 0,
+        done: raw.done ?? false,
+        status: raw.status ?? "flying",
+        shipMode: app.shipMode,
+        ship: raw.ship ?? { x: 0, y: 0 },
+        shipVel: raw.shipVel ?? { x: 0, y: 0 },
+        booster: raw.booster ?? { x: 0, y: 0 },
+        prevBooster: raw.booster ?? { x: 0, y: 0 },
+        velocity: raw.velocity ?? { x: 0, y: 0 },
+        prevVelocity: raw.velocity ?? { x: 0, y: 0 },
+        acceleration: raw.acceleration ?? { x: 0, y: 0 },
+        measuredVelocity: raw.measuredVelocity ?? { x: 0, y: 0 },
+        measuredAcceleration: raw.measuredAcceleration ?? { x: 0, y: 0 },
+        wind: raw.wind ?? { x: 0, y: 0 },
+        drag: raw.drag ?? { x: 0, y: 0 },
+        thrust: raw.thrust ?? { x: 0, y: 0 },
+        fuel: raw.fuel ?? 0,
+        distance: raw.distance ?? 0,
+        path: []
+      };
+    }
+
+    function currentFrame() {
+      if (app.mode === "demo") {
+        if (app.demoFrames.length === 0) return normalizeDemoFrame({});
+        const frame = normalizeDemoFrame(app.demoFrames[app.demoIndex] || {});
+        frame.path = app.demoFrames
+          .slice(0, app.demoIndex + 1)
+          .map(f => f.booster || { x: 0, y: 0 });
+        return frame;
+      }
+
+      return app.world;
+    }
+
+    function drawWorld(frame) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      drawBackgroundGrid();
+      drawWater();
+      drawPath(frame);
+      drawShip(frame);
+      drawBooster(frame);
+      drawVectors(frame);
+      drawOverlayTitle(frame);
+    }
+
+    function drawBackgroundGrid() {
+      ctx.save();
+      ctx.strokeStyle = "rgba(255,255,255,0.06)";
+      ctx.lineWidth = 1;
+
+      for (let x = -15; x <= 15; x += 1.5) {
+        const a = worldToScreen(pt(x, CONFIG.worldBottom));
+        const b = worldToScreen(pt(x, CONFIG.worldTop));
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+
+      for (let y = -2; y <= 18; y += 1.5) {
+        const a = worldToScreen(pt(CONFIG.worldLeft, y));
+        const b = worldToScreen(pt(CONFIG.worldRight, y));
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawWater() {
+      const top = worldToScreen(pt(0, CONFIG.waterY)).y;
+
+      ctx.save();
+      ctx.fillStyle = "rgba(46, 95, 186, 0.28)";
+      ctx.fillRect(0, top, canvas.width, canvas.height - top);
+
+      ctx.strokeStyle = "#67c7ff";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, top);
+      ctx.lineTo(canvas.width, top);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawPath(frame) {
+      if (!frame.path || frame.path.length < 2) return;
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(183,136,255,0.75)";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+
+      const p0 = worldToScreen(frame.path[0]);
+      ctx.moveTo(p0.x, p0.y);
+
+      for (let i = 1; i < frame.path.length; i++) {
+        const p = worldToScreen(frame.path[i]);
+        ctx.lineTo(p.x, p.y);
+      }
+
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawShip(frame) {
+      const sx = frame.ship.x;
+      const deckY = CONFIG.deckHeight;
+
+      const left = worldToScreen(pt(sx - CONFIG.deckHalfWidth, deckY));
+      const right = worldToScreen(pt(sx + CONFIG.deckHalfWidth, deckY));
+      const hullL = worldToScreen(pt(sx - 1.8, 0.2));
+      const hullR = worldToScreen(pt(sx + 1.8, 0.2));
+      const center = worldToScreen(pt(sx, deckY));
+
+      ctx.save();
+
+      ctx.fillStyle = "rgba(40,84,168,0.18)";
+      ctx.fillRect(left.x, left.y - 10, right.x - left.x, 20);
+
+      ctx.strokeStyle = "#67c7ff";
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(left.x, left.y);
+      ctx.lineTo(right.x, right.y);
+      ctx.stroke();
+
+      ctx.strokeStyle = "#4ec2ff";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(left.x, left.y);
+      ctx.lineTo(hullL.x, hullL.y);
+      ctx.lineTo(hullR.x, hullR.y);
+      ctx.lineTo(right.x, right.y);
+      ctx.stroke();
+
+      ctx.strokeStyle = "#9fffc7";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(center.x, center.y - 10, 8, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(center.x - 10, center.y - 10);
+      ctx.lineTo(center.x + 10, center.y - 10);
+      ctx.moveTo(center.x, center.y - 20);
+      ctx.lineTo(center.x, center.y);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawBooster(frame) {
+      const p = worldToScreen(frame.booster);
+
+      const bodyTop = p.y - 34;
+      const bodyBottom = p.y + 18;
+      const bodyW = 18;
+      const bodyX = p.x - bodyW / 2;
+
+      ctx.save();
+
+      ctx.fillStyle = "rgba(0,0,0,0.18)";
+      ctx.beginPath();
+      ctx.ellipse(p.x + 3, bodyBottom + 10, 16, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#d7dde9";
+      ctx.strokeStyle = "#9aa7c2";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.rect(bodyX, bodyTop, bodyW, bodyBottom - bodyTop);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "#c8cfdd";
+      ctx.beginPath();
+      ctx.moveTo(p.x, bodyTop - 14);
+      ctx.lineTo(p.x - 9, bodyTop);
+      ctx.lineTo(p.x + 9, bodyTop);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "#8f63ff";
+      ctx.fillRect(bodyX + 2, bodyTop + 8, bodyW - 4, 6);
+
+      ctx.fillStyle = "#7ee2ff";
+      ctx.beginPath();
+      ctx.arc(p.x, bodyTop + 22, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#8f9ab3";
+      ctx.beginPath();
+      ctx.moveTo(bodyX, bodyBottom - 10);
+      ctx.lineTo(bodyX - 9, bodyBottom + 4);
+      ctx.lineTo(bodyX, bodyBottom + 2);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(bodyX + bodyW, bodyBottom - 10);
+      ctx.lineTo(bodyX + bodyW + 9, bodyBottom + 4);
+      ctx.lineTo(bodyX + bodyW, bodyBottom + 2);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = "#b9c4da";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(p.x - 5, bodyBottom);
+      ctx.lineTo(p.x - 14, bodyBottom + 12);
+      ctx.moveTo(p.x + 5, bodyBottom);
+      ctx.lineTo(p.x + 14, bodyBottom + 12);
+      ctx.stroke();
+
+      ctx.fillStyle = "#7b86a0";
+      ctx.beginPath();
+      ctx.moveTo(p.x - 6, bodyBottom);
+      ctx.lineTo(p.x + 6, bodyBottom);
+      ctx.lineTo(p.x + 4, bodyBottom + 8);
+      ctx.lineTo(p.x - 4, bodyBottom + 8);
+      ctx.closePath();
+      ctx.fill();
+
+      const thrusting =
+        app.keys.has("ArrowUp") || app.keys.has("w") || app.keys.has("W");
+
+      if (frame.status === "flying" && thrusting) {
+        const flicker = 10 + (frame.tick % 3) * 4;
+
+        ctx.fillStyle = "#ff9f43";
+        ctx.beginPath();
+        ctx.moveTo(p.x, bodyBottom + 8 + flicker);
+        ctx.lineTo(p.x - 6, bodyBottom + 8);
+        ctx.lineTo(p.x + 6, bodyBottom + 8);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = "#ffd36b";
+        ctx.beginPath();
+        ctx.moveTo(p.x, bodyBottom + 4 + flicker * 0.65);
+        ctx.lineTo(p.x - 3, bodyBottom + 8);
+        ctx.lineTo(p.x + 3, bodyBottom + 8);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      if (frame.status === "landed") {
+        ctx.strokeStyle = "#84f2b1";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(p.x, bodyTop - 10, 10, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawArrow(start, vecWorld, color, label) {
+      const scalePx = 36;
+      const a = worldToScreen(start);
+      const endPx = {
+        x: a.x + vecWorld.x * scalePx,
+        y: a.y - vecWorld.y * scalePx
+      };
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 2;
+
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(endPx.x, endPx.y);
+      ctx.stroke();
+
+      const angle = Math.atan2(endPx.y - a.y, endPx.x - a.x);
+      const head = 8;
+
+      ctx.beginPath();
+      ctx.moveTo(endPx.x, endPx.y);
+      ctx.lineTo(
+        endPx.x - head * Math.cos(angle - Math.PI / 6),
+        endPx.y - head * Math.sin(angle - Math.PI / 6)
+      );
+      ctx.lineTo(
+        endPx.x - head * Math.cos(angle + Math.PI / 6),
+        endPx.y - head * Math.sin(angle + Math.PI / 6)
+      );
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.font = "12px Segoe UI";
+      ctx.fillText(label, endPx.x + 6, endPx.y - 6);
+
+      ctx.restore();
+    }
+
+    function drawVectors(frame) {
+      drawArrow(frame.booster, frame.wind, "#78f0e7", "wind");
+      drawArrow(frame.booster, frame.thrust, "#84f2b1", "thrust");
+    }
+
+    function drawOverlayTitle(frame) {
+      ctx.save();
+
+      ctx.fillStyle = "#e8eefc";
+      ctx.font = "bold 24px Segoe UI";
+      ctx.fillText("Booster Landing Demo", 18, 30);
+
+      ctx.font = "bold 14px Segoe UI";
+      ctx.fillStyle =
+        frame.status === "landed" ? "#84f2b1" :
+        frame.status === "crashed" ? "#ff7c8d" :
+        "#dce8ff";
+
+      ctx.fillText(`status: ${frame.status}`, 18, 54);
+
+      if (frame.status === "landed") {
+        ctx.fillStyle = "rgba(132,242,177,0.18)";
+        ctx.fillRect(18, 70, 230, 40);
+        ctx.strokeStyle = "#84f2b1";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(18, 70, 230, 40);
+        ctx.fillStyle = "#84f2b1";
+        ctx.font = "bold 22px Segoe UI";
+        ctx.fillText("SUCCESSFUL LANDING", 28, 97);
+      }
+
+      if (frame.status === "crashed") {
+        ctx.fillStyle = "rgba(255,124,141,0.18)";
+        ctx.fillRect(18, 70, 130, 40);
+        ctx.strokeStyle = "#ff7c8d";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(18, 70, 130, 40);
+        ctx.fillStyle = "#ff7c8d";
+        ctx.font = "bold 22px Segoe UI";
+        ctx.fillText("CRASHED", 34, 97);
+      }
+
+      ctx.restore();
+    }
+
+    function updateHud(frame) {
+      hudMode.textContent = app.mode;
+      hudShipMode.textContent = app.shipMode;
+      hudTick.textContent = frame.tick ?? 0;
+
+      hudStatus.textContent = frame.status ?? "unknown";
+      hudStatus.className = "value " + (
+        frame.status === "landed" ? "green" :
+        frame.status === "crashed" ? "red" : ""
+      );
+
+      hudDistance.textContent = fmt(frame.distance ?? 0);
+      hudPosition.textContent = `(${fmt(frame.booster.x)}, ${fmt(frame.booster.y)})`;
+      hudVelocity.textContent = `(${fmt(frame.velocity.x)}, ${fmt(frame.velocity.y)})`;
+      hudAcceleration.textContent = `(${fmt(frame.acceleration.x)}, ${fmt(frame.acceleration.y)})`;
+      hudFuel.textContent = fmt(frame.fuel ?? 0);
+
+      hudMeasuredVelocity.textContent =
+        `(${fmt(frame.measuredVelocity.x)}, ${fmt(frame.measuredVelocity.y)})`;
+
+      hudMeasuredAcceleration.textContent =
+        `(${fmt(frame.measuredAcceleration.x)}, ${fmt(frame.measuredAcceleration.y)})`;
+
+      hudWind.textContent =
+        `(${fmt(frame.wind.x)}, ${fmt(frame.wind.y)})`;
+
+      hudThrust.textContent =
+        `(${fmt(frame.thrust.x)}, ${fmt(frame.thrust.y)})`;
+
+      hudDrag.textContent =
+        `(${fmt(frame.drag.x)}, ${fmt(frame.drag.y)})`;
+
+      modePill.textContent = `Mode: ${app.mode}`;
+    }
+
+    function render() {
+      const frame = currentFrame();
+      drawWorld(frame);
+      updateHud(frame);
+    }
+
+    function restartDemo() {
+      app.mode = "demo";
+      app.playing = true;
+      app.demoIndex = 0;
+      render();
+    }
+
+    function restartInteractive() {
+      app.mode = "interactive";
+      app.playing = true;
+      app.world = makeInitialInteractiveWorld(app.shipMode);
+      app.world.distance = distanceToDeck(app.world);
+      render();
+    }
+
+    function stepDemo() {
+      if (!app.playing) return;
+      if (app.demoFrames.length === 0) return;
+
+      const f = app.demoFrames[app.demoIndex];
+
+      if (f?.done || f?.status === "landed" || f?.status === "crashed") {
+        app.playing = false;
+        render();
+        return;
+      }
+
+      if (app.demoIndex < app.demoFrames.length - 1) {
+        app.demoIndex++;
+      } else {
+        app.playing = false;
+      }
+
+      render();
+    }
+
+    function stepInteractive() {
+      if (!app.playing) return;
+
+      app.world = onTickInteractive(app.world);
+      render();
+
+      if (stopWhen(app.world)) {
+        app.playing = false;
+      }
+    }
+
+    function gameLoop() {
+      if (app.mode === "demo") {
+        stepDemo();
+      } else {
+        stepInteractive();
+      }
+    }
+
+    document.getElementById("watchDemoBtn").addEventListener("click", () => {
+      restartDemo();
+      document.getElementById("pauseBtn").textContent = "Pause";
+    });
+
+    document.getElementById("playInteractiveBtn").addEventListener("click", () => {
+      restartInteractive();
+      document.getElementById("pauseBtn").textContent = "Pause";
+    });
+
+    document.getElementById("pauseBtn").addEventListener("click", () => {
+      app.playing = !app.playing;
+      document.getElementById("pauseBtn").textContent = app.playing ? "Pause" : "Resume";
+    });
+
+    document.getElementById("restartBtn").addEventListener("click", () => {
+      if (app.mode === "demo") {
+        restartDemo();
+      } else {
+        restartInteractive();
+      }
+
+      document.getElementById("pauseBtn").textContent = "Pause";
+    });
+
+    shipModeSelect.addEventListener("change", (e) => {
+      app.shipMode = e.target.value;
+
+      if (app.mode === "interactive") {
+        restartInteractive();
+      } else {
+        render();
+      }
+
+      document.getElementById("pauseBtn").textContent = "Pause";
+    });
+
+    window.addEventListener("keydown", (e) => {
+      app.keys.add(e.key);
+    });
+
+    window.addEventListener("keyup", (e) => {
+      app.keys.delete(e.key);
+    });
+
+    async function loadDemoFrames() {
+      try {
+        const res = await fetch("frames.json", { cache: "no-store" });
+        if (!res.ok) throw new Error("Could not load frames.json");
+        app.demoFrames = await res.json();
+      } catch (err) {
+        console.error(err);
+        app.demoFrames = [];
+      }
+    }
+
+    async function main() {
+      await loadDemoFrames();
+
+      app.shipMode = shipModeSelect.value;
+      restartInteractive();
+
+      setInterval(gameLoop, CONFIG.frameDelayMs);
+    }
+
+    main();
+  </script>
+</body>
+</html>

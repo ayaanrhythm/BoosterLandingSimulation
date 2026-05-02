@@ -1,0 +1,10 @@
+name = "BoosterLandingSimulation"
+version = "0.1.0"
+defaultTargets = ["make_frames"]
+
+[[lean_lib]]
+name = "BoosterLandingSimulation"
+
+[[lean_exe]]
+name = "make_frames"
+root = "Main"
